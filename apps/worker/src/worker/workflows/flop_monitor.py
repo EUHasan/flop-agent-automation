@@ -8,7 +8,6 @@ the key is expired or close to expiry, or the faucet is closed.
 
 from datetime import UTC, datetime
 
-import httpx
 import mistralai.workflows as workflows
 from pydantic import BaseModel, Field
 
@@ -39,6 +38,8 @@ class MonitorOutput(BaseModel):
 @workflows.activity()
 async def check_gateway() -> dict:
     """Fetch the FLOP gateway health and the live model catalog."""
+    import httpx
+
     async with httpx.AsyncClient(timeout=30) as client:
         health_response = await client.get(f"{FLOP_GATEWAY_BASE_URL}/health")
         health_response.raise_for_status()
@@ -52,6 +53,8 @@ async def check_gateway() -> dict:
 @workflows.activity()
 async def check_faucet() -> dict:
     """Fetch the FLOP devnet faucet status."""
+    import httpx
+
     async with httpx.AsyncClient(timeout=30) as client:
         response = await client.get(f"{FLOP_FAUCET_BASE_URL}/limits")
         response.raise_for_status()
@@ -63,6 +66,8 @@ async def check_faucet() -> dict:
 async def check_agent_key() -> dict:
     """Check the agent gateway key bound as the FLOP_GATEWAY_KEY secret."""
     import os
+
+    import httpx
 
     key = os.environ.get("FLOP_GATEWAY_KEY", "").strip()
     if not key:
